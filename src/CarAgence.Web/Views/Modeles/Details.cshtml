@@ -1,0 +1,39 @@
+@model CarAgence.Domain.Entities.Modele
+
+@{ ViewData["Title"] = $"Modele - {Model.Nom}"; }
+
+<h1>@Model.Marque?.Nom - @Model.Nom</h1>
+
+<h3>Voitures</h3>
+@if (Model.Voitures.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Immatriculation</th>
+                <th>Annee</th>
+                <th>Tarif/j</th>
+                <th>Places</th>
+                <th>Carburant</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var v in Model.Voitures)
+            {
+                <tr>
+                    <td><a asp-controller="Voitures" asp-action="Details" asp-route-id="@v.Id">@v.Immatriculation</a></td>
+                    <td>@v.Annee</td>
+                    <td>@v.TarifJournalier €</td>
+                    <td>@v.NombrePlaces</td>
+                    <td>@v.Carburant</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Aucune voiture pour ce modele.</p>
+}
+
+<a asp-controller="Modeles" asp-action="Index" class="btn btn-secondary">Retour</a>

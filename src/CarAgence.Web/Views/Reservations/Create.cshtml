@@ -1,0 +1,45 @@
+@model CarAgence.Domain.Entities.Reservation
+
+@{
+    ViewData["Title"] = "Nouvelle reservation";
+}
+
+<h1>Nouvelle reservation</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="ClientId" class="form-label">Client</label>
+                <select asp-for="ClientId" asp-items="@((IEnumerable<SelectListItem>)ViewBag.Clients)" class="form-select">
+                    <option value="">-- Choisir un client --</option>
+                </select>
+                <span asp-validation-for="ClientId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="VoitureId" class="form-label">Voiture</label>
+                <select asp-for="VoitureId" asp-items="@((IEnumerable<SelectListItem>)ViewBag.Voitures)" class="form-select">
+                    <option value="">-- Choisir une voiture --</option>
+                </select>
+                <span asp-validation-for="VoitureId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DateDebut" class="form-label">Date de debut</label>
+                <input asp-for="DateDebut" class="form-control" type="date" />
+                <span asp-validation-for="DateDebut" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DateFin" class="form-label">Date de fin</label>
+                <input asp-for="DateFin" class="form-control" type="date" />
+                <span asp-validation-for="DateFin" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Creer</button>
+            <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

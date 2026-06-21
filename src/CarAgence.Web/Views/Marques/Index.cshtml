@@ -1,0 +1,32 @@
+@model IEnumerable<CarAgence.Domain.Entities.Marque>
+
+@{ ViewData["Title"] = "Marques"; }
+
+<h1>Marques</h1>
+<p><a asp-action="Create" class="btn btn-primary">Ajouter une marque</a></p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Pays</th>
+            <th>Modeles</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var marque in Model)
+        {
+            <tr>
+                <td>@marque.Nom</td>
+                <td>@(marque.PaysOrigine ?? "-")</td>
+                <td>@marque.Modeles.Count</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@marque.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                    <a asp-action="Edit" asp-route-id="@marque.Id" class="btn btn-sm btn-outline-primary">Modifier</a>
+                    <a asp-action="Delete" asp-route-id="@marque.Id" class="btn btn-sm btn-outline-danger">Supprimer</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,23 @@
+@model CarAgence.Domain.Entities.Reservation
+
+@{ ViewData["Title"] = "Supprimer reservation"; }
+
+<h1>Supprimer la reservation</h1>
+
+<div class="alert alert-warning">
+    <h5>Etes-vous sur de vouloir supprimer cette reservation ?</h5>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Client :</strong> @Model.Client?.Prenom @Model.Client?.Nom</p>
+        <p><strong>Voiture :</strong> @Model.Voiture?.Immatriculation - @Model.Voiture?.Modele?.Marque?.Nom @Model.Voiture?.Modele?.Nom</p>
+        <p><strong>Periode :</strong> @Model.DateDebut.ToString("dd/MM/yyyy") - @Model.DateFin.ToString("dd/MM/yyyy")</p>
+    </div>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Supprimer</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+</form>

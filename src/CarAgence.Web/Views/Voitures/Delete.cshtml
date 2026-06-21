@@ -1,0 +1,25 @@
+@model CarAgence.Domain.Entities.Voiture
+
+@{ ViewData["Title"] = $"Supprimer - {Model.Immatriculation}"; }
+
+<h1>Supprimer la voiture</h1>
+
+<div class="alert alert-warning">
+    <h5>Etes-vous sur de vouloir supprimer cette voiture ?</h5>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Immatriculation :</strong> @Model.Immatriculation</p>
+        <p><strong>Marque :</strong> @Model.Modele?.Marque?.Nom</p>
+        <p><strong>Modele :</strong> @Model.Modele?.Nom</p>
+        <p><strong>Annee :</strong> @Model.Annee</p>
+        <p><strong>Tarif journalier :</strong> @Model.TarifJournalier €</p>
+    </div>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Supprimer</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+</form>

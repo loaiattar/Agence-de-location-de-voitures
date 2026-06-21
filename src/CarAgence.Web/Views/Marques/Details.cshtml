@@ -1,0 +1,30 @@
+@model CarAgence.Domain.Entities.Marque
+
+@{ ViewData["Title"] = $"Marque - {Model.Nom}"; }
+
+<h1>@Model.Nom</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Pays :</strong> @(Model.PaysOrigine ?? "-")</p>
+    </div>
+</div>
+
+<h3>Modeles</h3>
+@if (Model.Modeles.Any())
+{
+    <ul class="list-group mb-3">
+        @foreach (var modele in Model.Modeles)
+        {
+            <li class="list-group-item">
+                <a asp-controller="Modeles" asp-action="Details" asp-route-id="@modele.Id">@modele.Nom</a>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>Aucun modele pour cette marque.</p>
+}
+
+<a asp-action="Index" class="btn btn-secondary">Retour</a>

@@ -1,0 +1,60 @@
+@model CarAgence.Domain.Entities.Voiture
+
+@{
+    ViewData["Title"] = "Ajouter une voiture";
+}
+
+<h1>Ajouter une voiture</h1>
+
+<!-- form to add a new car -->
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Immatriculation" class="form-label"></label>
+                <input asp-for="Immatriculation" class="form-control" />
+                <span asp-validation-for="Immatriculation" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ModeleId" class="form-label">Modele</label>
+                <select asp-for="ModeleId" asp-items="@((IEnumerable<SelectListItem>)ViewBag.Modeles)" class="form-select">
+                    <option value="">-- Choisir un modele --</option>
+                </select>
+                <span asp-validation-for="ModeleId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Annee" class="form-label"></label>
+                <input asp-for="Annee" class="form-control" />
+                <span asp-validation-for="Annee" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="TarifJournalier" class="form-label">Tarif journalier (€)</label>
+                <input asp-for="TarifJournalier" class="form-control" />
+                <span asp-validation-for="TarifJournalier" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="NombrePlaces" class="form-label"></label>
+                <input asp-for="NombrePlaces" class="form-control" />
+                <span asp-validation-for="NombrePlaces" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Carburant" class="form-label"></label>
+                <select asp-for="Carburant" class="form-select">
+                    <option value="">-- Choisir --</option>
+                    <option value="Essence">Essence</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Electrique">Electrique</option>
+                    <option value="Hybride">Hybride</option>
+                </select>
+                <span asp-validation-for="Carburant" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+            <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

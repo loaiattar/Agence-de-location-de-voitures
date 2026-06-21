@@ -1,0 +1,20 @@
+@model CarAgence.Domain.Entities.Reservation
+
+@{ ViewData["Title"] = "Details reservation"; }
+
+<h1>Reservation #@Model.Id</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Client :</strong> @Model.Client?.Prenom @Model.Client?.Nom</p>
+        <p><strong>Email :</strong> @Model.Client?.Email</p>
+        <p><strong>Voiture :</strong> @Model.Voiture?.Immatriculation - @Model.Voiture?.Modele?.Marque?.Nom @Model.Voiture?.Modele?.Nom</p>
+        <p><strong>Tarif journalier :</strong> @Model.Voiture?.TarifJournalier €</p>
+        <p><strong>Date debut :</strong> @Model.DateDebut.ToString("dd/MM/yyyy")</p>
+        <p><strong>Date fin :</strong> @Model.DateFin.ToString("dd/MM/yyyy")</p>
+        <p><strong>Duree :</strong> @((Model.DateFin - Model.DateDebut).Days) jour(s)</p>
+        <p><strong>Montant total :</strong> @Model.GetMontantTotal() €</p>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Retour</a>

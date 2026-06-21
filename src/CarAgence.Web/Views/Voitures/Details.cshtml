@@ -1,0 +1,19 @@
+@model CarAgence.Domain.Entities.Voiture
+
+@{ ViewData["Title"] = $"Voiture - {Model.Immatriculation}"; }
+
+<h1>@Model.Immatriculation</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Marque :</strong> @Model.Modele?.Marque?.Nom</p>
+        <p><strong>Modele :</strong> @Model.Modele?.Nom</p>
+        <p><strong>Annee :</strong> @Model.Annee</p>
+        <p><strong>Tarif journalier :</strong> @Model.TarifJournalier €</p>
+        <p><strong>Nombre de places :</strong> @Model.NombrePlaces</p>
+        <p><strong>Carburant :</strong> @Model.Carburant</p>
+    </div>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Modifier</a>
+<a asp-action="Index" class="btn btn-secondary">Retour</a>

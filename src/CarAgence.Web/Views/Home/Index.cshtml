@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Accueil";
+}
+
+<div class="text-center mb-4">
+    <h1 class="display-4">Locatic</h1>
+    <p class="lead" style="color: #666;">Agence de location de voitures</p>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body text-center">
+                <h2 class="card-title">@ViewBag.NombreVoitures</h2>
+                <p class="card-text">Voitures</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body text-center">
+                <h2 class="card-title">@ViewBag.NombreClients</h2>
+                <p class="card-text">Clients</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body text-center">
+                <h2 class="card-title">@ViewBag.NombreReservations</h2>
+                <p class="card-text">Reservations</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body text-center">
+                <h2 class="card-title">@ViewBag.ReservationsEnCours</h2>
+                <p class="card-text">En cours</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <a asp-controller="Voitures" asp-action="Index" class="btn btn-outline-primary btn-lg w-100 mb-2">Gerer les voitures</a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Clients" asp-action="Index" class="btn btn-outline-success btn-lg w-100 mb-2">Gerer les clients</a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Reservations" asp-action="Index" class="btn btn-outline-info btn-lg w-100 mb-2">Gerer les reservations</a>
+    </div>
+</div>

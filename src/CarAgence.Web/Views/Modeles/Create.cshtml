@@ -1,0 +1,31 @@
+@model CarAgence.Domain.Entities.Modele
+
+@{ ViewData["Title"] = "Ajouter un modele"; }
+
+<h1>Ajouter un modele</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Nom" class="form-label"></label>
+                <input asp-for="Nom" class="form-control" />
+                <span asp-validation-for="Nom" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MarqueId" class="form-label">Marque</label>
+                <select asp-for="MarqueId" asp-items="@((SelectList)ViewBag.Marques)" class="form-select">
+                    <option value="">-- Choisir une marque --</option>
+                </select>
+                <span asp-validation-for="MarqueId" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+            <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

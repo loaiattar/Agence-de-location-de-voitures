@@ -1,0 +1,32 @@
+@model IEnumerable<CarAgence.Domain.Entities.Modele>
+
+@{ ViewData["Title"] = "Modeles"; }
+
+<h1>Modeles</h1>
+<p><a asp-action="Create" class="btn btn-primary">Ajouter un modele</a></p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Marque</th>
+            <th>Voitures</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var modele in Model)
+        {
+            <tr>
+                <td>@modele.Nom</td>
+                <td>@modele.Marque?.Nom</td>
+                <td>@modele.Voitures.Count</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@modele.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                    <a asp-action="Edit" asp-route-id="@modele.Id" class="btn btn-sm btn-outline-primary">Modifier</a>
+                    <a asp-action="Delete" asp-route-id="@modele.Id" class="btn btn-sm btn-outline-danger">Supprimer</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

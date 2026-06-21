@@ -1,0 +1,14 @@
+@model CarAgence.Domain.Entities.Client
+
+@{ ViewData["Title"] = $"Client - {Model.Prenom} {Model.Nom}"; }
+
+<h1>@Model.Prenom @Model.Nom</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Email :</strong> @Model.Email</p>
+        <p><strong>Telephone :</strong> @(Model.Telephone ?? "-")</p>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Retour</a>
