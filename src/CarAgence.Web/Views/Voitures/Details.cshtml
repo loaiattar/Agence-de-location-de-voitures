@@ -1,19 +1,39 @@
 @model CarAgence.Domain.Entities.Voiture
 
-@{ ViewData["Title"] = $"Voiture - {Model.Immatriculation}"; }
+@{ ViewData["Title"] = Model.Immatriculation; }
 
-<h1>@Model.Immatriculation</h1>
+<div class="max-w-xl">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="space-y-3">
+            <div>
+                <span class="text-sm font-medium text-gray-500">Marque</span>
+                <p class="text-gray-900 font-medium">@Model.Modele?.Marque?.Nom</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Modele</span>
+                <p class="text-gray-900">@Model.Modele?.Nom</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Annee</span>
+                <p class="text-gray-900">@Model.Annee</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Tarif journalier</span>
+                <p class="text-gray-900 font-semibold text-lg">@Model.TarifJournalier €</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Nombre de places</span>
+                <p class="text-gray-900">@Model.NombrePlaces</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Carburant</span>
+                <p class="text-gray-900"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">@Model.Carburant</span></p>
+            </div>
+        </div>
+    </div>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <p><strong>Marque :</strong> @Model.Modele?.Marque?.Nom</p>
-        <p><strong>Modele :</strong> @Model.Modele?.Nom</p>
-        <p><strong>Annee :</strong> @Model.Annee</p>
-        <p><strong>Tarif journalier :</strong> @Model.TarifJournalier €</p>
-        <p><strong>Nombre de places :</strong> @Model.NombrePlaces</p>
-        <p><strong>Carburant :</strong> @Model.Carburant</p>
+    <div class="flex items-center gap-3">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">Modifier</a>
+        <a asp-action="Index" class="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors">&larr; Retour</a>
     </div>
 </div>
-
-<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Modifier</a>
-<a asp-action="Index" class="btn btn-secondary">Retour</a>

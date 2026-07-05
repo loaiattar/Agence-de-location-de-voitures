@@ -2,22 +2,34 @@
 
 @{ ViewData["Title"] = $"Supprimer - {Model.Nom}"; }
 
-<h1>Supprimer le modele</h1>
-
-<div class="alert alert-warning">
-    <h5>Etes-vous sur de vouloir supprimer ce modele ?</h5>
-</div>
-
-<div class="card mb-3">
-    <div class="card-body">
-        <p><strong>Nom :</strong> @Model.Nom</p>
-        <p><strong>Marque :</strong> @Model.Marque?.Nom</p>
-        <p><strong>Voitures :</strong> @Model.Voitures.Count</p>
+<div class="max-w-xl">
+    <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-6 py-4 mb-6">
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            <p class="font-medium">Etes-vous sur de vouloir supprimer ce modele ?</p>
+        </div>
     </div>
-</div>
 
-<form asp-action="Delete">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Supprimer</button>
-    <a asp-action="Index" class="btn btn-secondary">Annuler</a>
-</form>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="space-y-3">
+            <div>
+                <span class="text-sm font-medium text-gray-500">Nom</span>
+                <p class="text-gray-900 font-medium">@Model.Nom</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Marque</span>
+                <p class="text-gray-900">@Model.Marque?.Nom</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Voitures</span>
+                <p class="text-gray-900">@Model.Voitures.Count</p>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Delete" class="flex items-center gap-3">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">Supprimer</button>
+        <a asp-action="Index" class="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-colors">Annuler</a>
+    </form>
+</div>
