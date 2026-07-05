@@ -1,39 +1,56 @@
 @model CarAgence.Domain.Entities.Modele
 
-@{ ViewData["Title"] = $"Modele - {Model.Nom}"; }
+@{ ViewData["Title"] = $"{Model.Marque?.Nom} - {Model.Nom}"; }
 
-<h1>@Model.Marque?.Nom - @Model.Nom</h1>
+<div class="max-w-2xl">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <span class="text-sm font-medium text-gray-500">Marque</span>
+                <p class="text-gray-900 font-medium">@Model.Marque?.Nom</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Modele</span>
+                <p class="text-gray-900 font-medium">@Model.Nom</p>
+            </div>
+        </div>
+    </div>
 
-<h3>Voitures</h3>
-@if (Model.Voitures.Any())
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Immatriculation</th>
-                <th>Annee</th>
-                <th>Tarif/j</th>
-                <th>Places</th>
-                <th>Carburant</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var v in Model.Voitures)
-            {
-                <tr>
-                    <td><a asp-controller="Voitures" asp-action="Details" asp-route-id="@v.Id">@v.Immatriculation</a></td>
-                    <td>@v.Annee</td>
-                    <td>@v.TarifJournalier €</td>
-                    <td>@v.NombrePlaces</td>
-                    <td>@v.Carburant</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>Aucune voiture pour ce modele.</p>
-}
+    <h3 class="text-lg font-semibold text-gray-900 mb-3">Voitures</h3>
+    @if (Model.Voitures.Any())
+    {
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Immatriculation</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Annee</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Tarif/j</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Places</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Carburant</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach (var v in Model.Voitures)
+                    {
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4">
+                                <a asp-controller="Voitures" asp-action="Details" asp-route-id="@v.Id" class="font-medium text-brand-600 hover:text-brand-800">@v.Immatriculation</a>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">@v.Annee</td>
+                            <td class="px-6 py-4 text-gray-600">@v.TarifJournalier €</td>
+                            <td class="px-6 py-4 text-gray-600">@v.NombrePlaces</td>
+                            <td class="px-6 py-4 text-gray-600">@v.Carburant</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-gray-500 text-sm">Aucune voiture pour ce modele.</p>
+    }
 
-<a asp-controller="Modeles" asp-action="Index" class="btn btn-secondary">Retour</a>
+    <a asp-controller="Modeles" asp-action="Index" class="inline-block mt-6 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">&larr; Retour</a>
+</div>

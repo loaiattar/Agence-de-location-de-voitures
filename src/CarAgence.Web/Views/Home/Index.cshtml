@@ -2,54 +2,74 @@
     ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center mb-4">
-    <h1 class="display-4">Locatic</h1>
-    <p class="lead" style="color: #666;">Agence de location de voitures</p>
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">Tableau de bord</h2>
+    <p class="text-gray-500 mt-1">Vue d'ensemble de votre agence</p>
 </div>
 
-<div class="row">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-body text-center">
-                <h2 class="card-title">@ViewBag.NombreVoitures</h2>
-                <p class="card-text">Voitures</p>
+<!-- Stats cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-brand-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h.01M16 17h.01M3 11l1.5-5A2 2 0 016.4 4h11.2a2 2 0 011.9 1.4L21 11M3 11h18M3 11v6a1 1 0 001 1h1m16-7v6a1 1 0 01-1 1h-1M8 17a2 2 0 104 0m-4 0h4"/></svg>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-900">@ViewBag.NombreVoitures</p>
+                <p class="text-sm text-gray-500">Voitures</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-body text-center">
-                <h2 class="card-title">@ViewBag.NombreClients</h2>
-                <p class="card-text">Clients</p>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-900">@ViewBag.NombreClients</p>
+                <p class="text-sm text-gray-500">Clients</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info mb-3">
-            <div class="card-body text-center">
-                <h2 class="card-title">@ViewBag.NombreReservations</h2>
-                <p class="card-text">Reservations</p>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-900">@ViewBag.NombreReservations</p>
+                <p class="text-sm text-gray-500">Reservations</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-body text-center">
-                <h2 class="card-title">@ViewBag.ReservationsEnCours</h2>
-                <p class="card-text">En cours</p>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-900">@ViewBag.ReservationsEnCours</p>
+                <p class="text-sm text-gray-500">En cours</p>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <a asp-controller="Voitures" asp-action="Index" class="btn btn-outline-primary btn-lg w-100 mb-2">Gerer les voitures</a>
-    </div>
-    <div class="col-md-4">
-        <a asp-controller="Clients" asp-action="Index" class="btn btn-outline-success btn-lg w-100 mb-2">Gerer les clients</a>
-    </div>
-    <div class="col-md-4">
-        <a asp-controller="Reservations" asp-action="Index" class="btn btn-outline-info btn-lg w-100 mb-2">Gerer les reservations</a>
-    </div>
+<!-- Quick actions -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <a asp-controller="Voitures" asp-action="Index"
+       class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-6 py-4 hover:border-brand-300 hover:shadow-sm transition-all">
+        <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="font-medium text-gray-700">Gerer les voitures</span>
+    </a>
+    <a asp-controller="Clients" asp-action="Index"
+       class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-6 py-4 hover:border-green-300 hover:shadow-sm transition-all">
+        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="font-medium text-gray-700">Gerer les clients</span>
+    </a>
+    <a asp-controller="Reservations" asp-action="Index"
+       class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-6 py-4 hover:border-purple-300 hover:shadow-sm transition-all">
+        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="font-medium text-gray-700">Gerer les reservations</span>
+    </a>
 </div>
