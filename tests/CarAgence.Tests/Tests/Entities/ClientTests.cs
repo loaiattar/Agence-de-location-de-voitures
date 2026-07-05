@@ -24,7 +24,7 @@ public class ClientTests
     [InlineData(null)]
     public void Client_NomRequired_InvalidWhenEmptyOrMissing(string? nom)
     {
-        var client = new Client { Nom = nom, Prenom = "Jean", Email = "jean@test.com" };
+        var client = new Client { Nom = nom!, Prenom = "Jean", Email = "jean@test.com" };
         var results = new List<ValidationResult>();
         var context = new ValidationContext(client);
         var isValid = Validator.TryValidateObject(client, context, results, true);
@@ -38,7 +38,7 @@ public class ClientTests
     [InlineData(null)]
     public void Client_PrenomRequired_InvalidWhenEmptyOrMissing(string? prenom)
     {
-        var client = new Client { Nom = "Dupont", Prenom = prenom, Email = "jean@test.com" };
+        var client = new Client { Nom = "Dupont", Prenom = prenom!, Email = "jean@test.com" };
         var results = new List<ValidationResult>();
         var context = new ValidationContext(client);
         var isValid = Validator.TryValidateObject(client, context, results, true);
