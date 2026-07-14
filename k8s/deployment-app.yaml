@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caragence-app
+  namespace: caragence
+  labels:
+    app: caragence
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: caragence
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: caragence
+        component: backend
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/loaiattar/agence-de-location-de-voitures:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: caragence-secrets
+                  key: CONNECTION_STRING
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: sqlite-data
+          persistentVolumeClaim:
+            claimName: caragence-sqlite-pvc
