@@ -1,4 +1,4 @@
-# Agence de Location de Voitures
+# Agence de Location de Voitures (CarAgence)
 
 Application ASP.NET Core MVC de location de voitures avec persistance SQLite, déployée sur Kubernetes avec un pipeline DevOps complet.
 
@@ -20,10 +20,10 @@ Mettre en place une chaîne DevOps complète : gestion Git professionnelle, pipe
 
 ```
 ├── src/
-│   ├── CarAgence.Domain/      # Entités métier
-│   ├── CarAgence.Data/        # Contexte EF Core + SQLite
-│   ├── CarAgence.Services/    # Logique métier
-│   └── CarAgence.Web/         # Application web MVC
+│   ├── CarAgence.Domain/        # Entités métier
+│   ├── CarAgence.Data/          # Contexte EF Core + SQLite
+│   ├── CarAgence.Services/      # Logique métier
+│   └── CarAgence.Web/           # Application web MVC
 ├── tests/
 │   └── CarAgence.Tests/       # Tests unitaires (160 tests)
 ├── .github/workflows/
@@ -89,15 +89,38 @@ minikube service caragence-nginx -n caragence --url
 - 1 approval requis
 - Stale reviews révoqués
 
-## Développement
+## Documentation
 
-```bash
-dotnet restore
-dotnet build
-dotnet test
+| Document | Contenu |
+|----------|---------|
+| [Architecture](docs/architecture.md) | Vue d'ensemble, composants, flux |
+| [CI/CD](docs/ci-cd.md) | Pipeline GitHub Actions, règles de branche |
+| [Déploiement local](docs/deploiement-local.md) | Étapes complètes minikube |
+| [Terraform](docs/terraform.md) | Infrastructure, variables, outputs |
+| [Ansible](docs/ansible.md) | Playbook, étapes orchestrées |
+| [Kubernetes](docs/kubernetes.md) | Ressources K8s déployées |
+| [Monitoring](docs/monitoring.md) | Prometheus, Grafana, alertes |
+| [Exploitation](docs/exploitation.md) | Diagnostic, rollback, problèmes |
+| [Helm](docs/helm.md) | Chart bonus (si réalisé) |
+
+## Architecture
+
+```
+Utilisateur ──> Nginx (NodePort:80) ──> App ASP.NET (ClusterIP:8080) ──> SQLite (PVC)
+                                                                 │
+                                                    Prometheus ────┘
+                                                         │
+                                                     Grafana (dashboard)
 ```
 
-## Monitoring
+## Pipeline CI/CD
 
-- **Prometheus** : `minikube service prometheus -n caragence --url`
-- **Grafana** : `minikube service grafana -n caragence --url` (admin/admin)
+```
+Push feature/* ──> build-and-test ──> PR
+                                          │
+Push main ──> build-and-test ──> docker-build ──> Trivy scan ──> push ghcr.io
+```
+
+## Licence
+
+Projet pédagogique — Développement Web II

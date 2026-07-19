@@ -8,6 +8,7 @@ app_tag: latest
 # Infrastructure
 terraform_dir: "../terraform"
 k8s_manifests_dir: "../k8s"
+monitoring_dir: "../monitoring"
 
 # Health check settings
 health_check_retries: 30
