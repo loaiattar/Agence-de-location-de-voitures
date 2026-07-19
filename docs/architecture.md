@@ -2,82 +2,67 @@
 
 ## Vue d'ensemble
 
-CarAgence est une application ASP.NET Core MVC de location de voitures, déployée sur un cluster Kubernetes local (minikube) avec une chaîne DevOps complète.
+L'architecture suit un pipeline DevOps complet : code → CI/CD → infrastructure → déploiement → monitoring.
 
 ```
-GitHub ──> GitHub Actions ──> ghcr.io (image Docker)
-                                    │
-                                    ▼
-                            ┌──────────────────┐
-                            │   Machine locale  │
-                            │                   │
-                            │  Terraform ──> K8s │
-                            │  Ansible ──> K8s   │
-                            │                   │
-                            │  ┌─────────────┐  │
-                            │  │  minikube    │  │
-                            │  │             │  │
-                            │  │  Nginx ──> App │
-                            │  │  Prometheus  │  │
-                            │  │  Grafana     │  │
-                            │  │  SQLite (PV) │  │
-                            │  └─────────────┘  │
-                            └──────────────────┘
+GitHub (code + CI)
+    ↓
+GitHub Actions (build + test + scan + push image)
+    ↓
+ghcr.io (registry Docker)
+    ↓
+Terraform (namespace + stockage K8s)
+    ↓
+Ansible (orchestration locale)
+    ↓
+Kubernetes (minikube)
+    ├── Nginx (reverse proxy)
+    ├── App (ASP.NET Core MVC)
+    ├── SQLite (volume persistant)
+    ├── Prometheus (métriques)
+    └── Grafana (visualisation)
 ```
 
-## Composants
+## Rôle de chaque composant
 
-### Application (ASP.NET Core MVC)
-- **Domain** : entités métier (Marque, Modele, Voiture, Client, Reservation)
-- **Data** : contexte EF Core + SQLite + migrations
-- **Web** : controllers MVC + vues Razor + Tailwind CSS
-- **Tests** : ~119 tests unitaires (xUnit + Moq)
+### GitHub
+- Stockage central du code source
+- Gestion des Pull Requests et revues de code
+- Branch protection sur `main`
+- Publication de l'image Docker
 
-### Infrastructure
-| Composant | Rôle |
-|-----------|------|
-| **GitHub Actions** | CI/CD : build, test, Docker, Trivy, push ghcr.io |
-| **Terraform** | Prépare l'infrastructure K8s (namespace, PV, PVC) |
-| **Ansible** | Orchestre le déploiement complet sur minikube |
-| **Docker** | Image multi-stage, utilisateur non-root |
-| **Kubernetes** | Orchestration des pods, services, stockage |
+### GitHub Actions
+- Exécution automatique des tests et du build
+- Construction de l'image Docker
+- Scan de sécurité avec Trivy
+- Publication de l'image dans ghcr.io (uniquement sur `main`)
 
-### Déploiement K8s
-| Ressource | Description |
-|-----------|-------------|
-| **Deployment app** | 2 replicas de l'application ASP.NET |
-| **Deployment nginx** | 2 replicas du reverse proxy |
-| **Service app** | ClusterIP port 8080 |
-| **Service nginx** | NodePort port 80 (point d'entrée) |
-| **PVC SQLite** | Volume persistant 1Gi pour la base |
-| **Secret** | Connection string SQLite |
-| **ConfigMap nginx** | Configuration reverse proxy |
+### Terraform
+- Création du namespace Kubernetes
+- Provisionnement du PersistentVolume pour SQLite
+- Gestion de l'état d'infrastructure
+
+### Ansible
+- Vérification des prérequis (minikube, kubectl, terraform)
+- Orchestration du déploiement complet
+- Validation post-déploiement
+
+### Kubernetes
+- Orchestration des conteneurs
+- Gestion du cycle de vie des pods
+- Exposition des services
+- Stockage persistant
+
+### Nginx
+- Point d'entrée utilisateur
+- Reverse proxy vers l'application
+- Terminaison SSL (si configuré)
+
+### Application
+- ASP.NET Core MVC
+- SQLite pour la persistance
+- Health endpoints pour Kubernetes
 
 ### Monitoring
-| Composant | Port | Rôle |
-|-----------|------|------|
-| **Prometheus** | NodePort 30090 | Collecte des métriques (15s) |
-| **Grafana** | NodePort 30030 | Visualisation (dashboard 8 panneaux) |
-
-## Flux de déploiement
-
-1. Développeur crée une branche `feature/*` depuis `develop`
-2. Push → GitHub Actions exécute build + test
-3. PR vers `develop` ou `main` → CI valide
-4. Merge vers `main` → Docker build + Trivy scan + push ghcr.io
-5. Sur la machine locale :
-   - `terraform init && terraform apply` → namespace, PV, PVC
-   - `ansible-playbook ansible/playbook.yml` → déploiement complet K8s
-6. Application accessible via Nginx sur minikube
-
-## Persistance SQLite
-
-SQLite utilise un PersistentVolume (hostPath `/data/caragence-sqlite`) monté dans le pod applicatif au `/data`. Le fichier `caragence.db` survit aux redémarrages de pods.
-
-## Réseau
-
-```
-Utilisateur ──> Nginx (NodePort:80) ──> App (ClusterIP:8080) ──> SQLite (/data/caragence.db)
-```
-
-Nginx est le seul point d'entrée exposé. L'application n'est pas accessible directement depuis l'extérieur.
+- Prometheus : collecte des métriques
+- Grafana : visualisation et dashboards

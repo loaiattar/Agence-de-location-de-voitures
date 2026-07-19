@@ -2,72 +2,60 @@
 
 ## Prérequis
 
-- Docker installé et en cours d'exécution
+- Docker installé et démarré
 - minikube installé
 - kubectl installé
 - Terraform >= 1.0 installé
 - Ansible installé (`pip install ansible`)
 - Collections Ansible : `ansible-galaxy collection install community.general kubernetes.core`
-- Image Docker publiée sur ghcr.io (via pipeline CI sur `main`)
 
 ## Étapes de déploiement
 
-### 1. Vérifier que minikube est prêt
+### 1. Démarrer minikube
 
-```bash
-minikube status
-# Devrait afficher : Running
-```
-
-Si minikube n'est pas démarré :
 ```bash
 minikube start
 ```
 
-### 2. Configurer kubectl
+### 2. Construire l'image Docker
 
 ```bash
-kubectl config use-context minikube
-kubectl get nodes
+docker build -t ghcr.io/loaiattar/agence-de-location-de-voitures:latest .
 ```
 
-### 3. Exécuter le playbook Ansible
-
-Le playbook enchaîne automatiquement :
-1. Vérification des prérequis
-2. Terraform init/plan/apply (namespace, PV, PVC)
-3. Déploiement K8s (app, nginx, monitoring)
-4. Vérification de santé
-5. Affichage des URLs
+### 3. Charger l'image dans minikube
 
 ```bash
-cd ansible/
-ansible-playbook playbook.yml
+minikube image load ghcr.io/loaiattar/agence-de-location-de-voitures:latest
 ```
 
-### 4. Vérifier le déploiement
+### 4. Exécuter le playbook Ansible
 
 ```bash
-# Tous les pods
+ansible-playbook ansible/playbook.yml
+```
+
+Ce playbook exécute automatiquement :
+- Vérification des prérequis
+- Terraform init/plan/apply
+- Déploiement des ressources K8s
+- Validation de la santé
+
+### 5. Vérifier le déploiement
+
+```bash
 kubectl get all -n caragence
-
-# Pods de l'application
-kubectl get pods -n caragence -l component=backend
-
-# Pods nginx
-kubectl get pods -n caragence -l component=proxy
-
-# Monitoring
-kubectl get pods -n caragence -l component=monitoring
-kubectl get pods -n caragence -l component=grafana
 ```
 
-### 5. Accéder aux services
+### 6. Accéder à l'application
 
 ```bash
-# Application (via Nginx)
 minikube service caragence-nginx -n caragence --url
+```
 
+### 7. Accéder au monitoring
+
+```bash
 # Prometheus
 minikube service prometheus -n caragence --url
 
@@ -75,62 +63,30 @@ minikube service prometheus -n caragence --url
 minikube service grafana -n caragence --url
 ```
 
-### 6. Vérifier la santé
+## Commandes utiles
 
 ```bash
-# Health check
-curl http://$(minikube service caragence-nginx -n caragence --url | sed 's|https\?://||')/health
+# Voir les pods
+kubectl get pods -n caragence
 
-# Readiness check
-curl http://$(minikube service caragence-nginx -n caragence --url | sed 's|https\?://||')/health/ready
-```
+# Voir les logs
+kubectl logs -l app=caragence,component=backend -n caragence
 
-## Déploiement sans Ansible
+# Décrire une ressource
+kubectl describe deployment caragence-app -n caragence
 
-Si vous préférez exécuter les étapes manuellement :
-
-```bash
-# Terraform
-cd terraform/
-terraform init
-terraform apply
-
-# K8s manifests
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/pvc-sqlite.yaml
-kubectl apply -f k8s/secret.yaml
-kubectl apply -f k8s/configmap-nginx.yaml
-kubectl apply -f k8s/deployment-app.yaml
-kubectl apply -f k8s/deployment-nginx.yaml
-kubectl apply -f k8s/service-app.yaml
-kubectl apply -f k8s/service-nginx.yaml
-
-# Monitoring
-kubectl apply -f monitoring/prometheus-configmap.yaml
-kubectl apply -f monitoring/prometheus-deployment.yaml
-kubectl apply -f monitoring/prometheus-service.yaml
-kubectl apply -f monitoring/grafana-datasource-configmap.yaml
-kubectl apply -f monitoring/grafana-dashboard-configmap.yaml
-kubectl apply -f monitoring/grafana-deployment.yaml
-kubectl apply -f monitoring/grafana-service.yaml
-```
-
-## Développement local (sans minikube)
-
-```bash
-docker-compose up --build
-# App accessible sur http://localhost:80
+# Port-forward temporaire
+kubectl port-forward svc/caragence-nginx 8080:80 -n caragence
 ```
 
 ## Nettoyage
 
 ```bash
-# Supprimer les ressources K8s
+# Détruire les ressources K8s
 kubectl delete namespace caragence
 
 # Détruire l'infrastructure Terraform
-cd terraform/
-terraform destroy
+cd terraform && terraform destroy
 
 # Arrêter minikube
 minikube stop
