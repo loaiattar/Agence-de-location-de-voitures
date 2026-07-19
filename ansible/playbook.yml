@@ -122,6 +122,41 @@
       register: kubectl_svc_nginx
       changed_when: "'created' in kubectl_svc_nginx.stdout or 'configured' in kubectl_svc_nginx.stdout"
 
+    - name: Apply Prometheus ConfigMap
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/prometheus-configmap.yaml"
+      register: kubectl_prom_config
+      changed_when: "'created' in kubectl_prom_config.stdout or 'configured' in kubectl_prom_config.stdout"
+
+    - name: Deploy Prometheus
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/prometheus-deployment.yaml"
+      register: kubectl_prom_deploy
+      changed_when: "'created' in kubectl_prom_deploy.stdout or 'configured' in kubectl_prom_deploy.stdout"
+
+    - name: Apply Prometheus service
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/prometheus-service.yaml"
+      register: kubectl_prom_svc
+      changed_when: "'created' in kubectl_prom_svc.stdout or 'configured' in kubectl_prom_svc.stdout"
+
+    - name: Apply Grafana datasource ConfigMap
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/grafana-datasource-configmap.yaml"
+      register: kubectl_grafana_ds
+      changed_when: "'created' in kubectl_grafana_ds.stdout or 'configured' in kubectl_grafana_ds.stdout"
+
+    - name: Apply Grafana dashboard ConfigMap
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/grafana-dashboard-configmap.yaml"
+      register: kubectl_grafana_dash
+      changed_when: "'created' in kubectl_grafana_dash.stdout or 'configured' in kubectl_grafana_dash.stdout"
+
+    - name: Deploy Grafana
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/grafana-deployment.yaml"
+      register: kubectl_grafana_deploy
+      changed_when: "'created' in kubectl_grafana_deploy.stdout or 'configured' in kubectl_grafana_deploy.stdout"
+
+    - name: Apply Grafana service
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/grafana-service.yaml"
+      register: kubectl_grafana_svc
+      changed_when: "'created' in kubectl_grafana_svc.stdout or 'configured' in kubectl_grafana_svc.stdout"
+
     - name: Wait for application pods to be ready
       ansible.builtin.command: >
         kubectl wait --for=condition=ready pod
@@ -160,6 +195,18 @@
       register: app_url
       changed_when: false
 
+    - name: Get Prometheus URL
+      ansible.builtin.command: minikube service prometheus -n caragence --url
+      register: prometheus_url
+      changed_when: false
+      ignore_errors: true
+
+    - name: Get Grafana URL
+      ansible.builtin.command: minikube service grafana -n caragence --url
+      register: grafana_url
+      changed_when: false
+      ignore_errors: true
+
     - name: Display deployment summary
       ansible.builtin.debug:
         msg: |
@@ -170,4 +217,6 @@
           Storage: {{ tf_storage_path }}
           App URL: {{ app_url.stdout }}
           Health: http://{{ app_url.stdout | regex_replace('https?://', '') }}/health
+          Prometheus: {{ prometheus_url.stdout | default('pending...') }}
+          Grafana: {{ grafana_url.stdout | default('pending...') }} (admin/admin)
     
