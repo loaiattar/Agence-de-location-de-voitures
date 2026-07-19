@@ -1,0 +1,222 @@
+---
+- name: Deploy CarAgence on minikube
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    - defaults/main.yml
+
+  tasks:
+    - name: Verify prerequisites
+      block:
+        - name: Check minikube is installed
+          ansible.builtin.command: minikube version
+          register: minikube_version
+          changed_when: false
+
+        - name: Display minikube version
+          ansible.builtin.debug:
+            msg: "minikube: {{ minikube_version.stdout_lines[0] }}"
+
+        - name: Check kubectl is installed
+          ansible.builtin.command: kubectl version --client
+          register: kubectl_version
+          changed_when: false
+
+        - name: Display kubectl version
+          ansible.builtin.debug:
+            msg: "kubectl: {{ kubectl_version.stdout_lines[0] }}"
+
+        - name: Check Terraform is installed
+          ansible.builtin.command: terraform version
+          register: terraform_version
+          changed_when: false
+
+        - name: Display terraform version
+          ansible.builtin.debug:
+            msg: "terraform: {{ terraform_version.stdout_lines[0] }}"
+
+    - name: Verify minikube is running
+      ansible.builtin.command: minikube status
+      register: minikube_status
+      changed_when: false
+      failed_when: "'Running' not in minikube_status.stdout"
+
+    - name: Ensure kubectl context is minikube
+      ansible.builtin.command: kubectl config use-context minikube
+      changed_when: false
+
+    - name: Initialize Terraform
+      community.general.terraform:
+        project_path: "{{ terraform_dir }}"
+        force_init: true
+      register: terraform_init
+
+    - name: Plan Terraform changes
+      community.general.terraform:
+        project_path: "{{ terraform_dir }}"
+        plan_file: "{{ terraform_dir }}/tfplan"
+        state: planned
+      register: terraform_plan
+
+    - name: Display Terraform plan
+      ansible.builtin.debug:
+        msg: "{{ terraform_plan.stdout_lines }}"
+
+    - name: Apply Terraform changes
+      community.general.terraform:
+        project_path: "{{ terraform_dir }}"
+        plan_file: "{{ terraform_dir }}/tfplan"
+        state: present
+      register: terraform_apply
+
+    - name: Display Terraform outputs
+      ansible.builtin.debug:
+        msg: "{{ terraform_apply.outputs }}"
+
+    - name: Save Terraform outputs as facts
+      ansible.builtin.set_fact:
+        tf_namespace: "{{ terraform_apply.outputs.namespace.value }}"
+        tf_pv_name: "{{ terraform_apply.outputs.pv_name.value }}"
+        tf_pvc_name: "{{ terraform_apply.outputs.pvc_name.value }}"
+        tf_storage_path: "{{ terraform_apply.outputs.storage_path.value }}"
+
+    - name: Apply Kubernetes namespace
+      ansible.builtin.command: kubectl apply -f "{{ k8s_manifests_dir }}/namespace.yaml"
+      register: kubectl_namespace
+      changed_when: "'created' in kubectl_namespace.stdout or 'configured' in kubectl_namespace.stdout"
+
+    - name: Apply PVC for SQLite
+      ansible.builtin.command: kubectl apply -f "{{ k8s_manifests_dir }}/pvc-sqlite.yaml"
+      register: kubectl_pvc
+      changed_when: "'created' in kubectl_pvc.stdout or 'configured' in kubectl_pvc.stdout"
+
+    - name: Apply Secrets
+      ansible.builtin.command: kubectl apply -f "{{ k8s_manifests_dir }}/secret.yaml"
+      register: kubectl_secret
+      changed_when: "'created' in kubectl_secret.stdout or 'configured' in kubectl_secret.stdout"
+
+    - name: Apply Nginx ConfigMap
+      ansible.builtin.command: kubectl apply -f "{{ k8s_manifests_dir }}/configmap-nginx.yaml"
+      register: kubectl_configmap
+      changed_when: "'created' in kubectl_configmap.stdout or 'configured' in kubectl_configmap.stdout"
+
+    - name: Deploy application
+      ansible.builtin.command: kubectl apply -f "{{ k8s_manifests_dir }}/deployment-app.yaml"
+      register: kubectl_deploy_app
+      changed_when: "'created' in kubectl_deploy_app.stdout or 'configured' in kubectl_deploy_app.stdout"
+
+    - name: Deploy Nginx reverse proxy
+      ansible.builtin.command: kubectl apply -f "{{ k8s_manifests_dir }}/deployment-nginx.yaml"
+      register: kubectl_deploy_nginx
+      changed_when: "'created' in kubectl_deploy_nginx.stdout or 'configured' in kubectl_deploy_nginx.stdout"
+
+    - name: Apply application service
+      ansible.builtin.command: kubectl apply -f "{{ k8s_manifests_dir }}/service-app.yaml"
+      register: kubectl_svc_app
+      changed_when: "'created' in kubectl_svc_app.stdout or 'configured' in kubectl_svc_app.stdout"
+
+    - name: Apply Nginx service
+      ansible.builtin.command: kubectl apply -f "{{ k8s_manifests_dir }}/service-nginx.yaml"
+      register: kubectl_svc_nginx
+      changed_when: "'created' in kubectl_svc_nginx.stdout or 'configured' in kubectl_svc_nginx.stdout"
+
+    - name: Apply Prometheus ConfigMap
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/prometheus-configmap.yaml"
+      register: kubectl_prom_config
+      changed_when: "'created' in kubectl_prom_config.stdout or 'configured' in kubectl_prom_config.stdout"
+
+    - name: Deploy Prometheus
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/prometheus-deployment.yaml"
+      register: kubectl_prom_deploy
+      changed_when: "'created' in kubectl_prom_deploy.stdout or 'configured' in kubectl_prom_deploy.stdout"
+
+    - name: Apply Prometheus service
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/prometheus-service.yaml"
+      register: kubectl_prom_svc
+      changed_when: "'created' in kubectl_prom_svc.stdout or 'configured' in kubectl_prom_svc.stdout"
+
+    - name: Apply Grafana datasource ConfigMap
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/grafana-datasource-configmap.yaml"
+      register: kubectl_grafana_ds
+      changed_when: "'created' in kubectl_grafana_ds.stdout or 'configured' in kubectl_grafana_ds.stdout"
+
+    - name: Apply Grafana dashboard ConfigMap
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/grafana-dashboard-configmap.yaml"
+      register: kubectl_grafana_dash
+      changed_when: "'created' in kubectl_grafana_dash.stdout or 'configured' in kubectl_grafana_dash.stdout"
+
+    - name: Deploy Grafana
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/grafana-deployment.yaml"
+      register: kubectl_grafana_deploy
+      changed_when: "'created' in kubectl_grafana_deploy.stdout or 'configured' in kubectl_grafana_deploy.stdout"
+
+    - name: Apply Grafana service
+      ansible.builtin.command: kubectl apply -f "{{ monitoring_dir }}/grafana-service.yaml"
+      register: kubectl_grafana_svc
+      changed_when: "'created' in kubectl_grafana_svc.stdout or 'configured' in kubectl_grafana_svc.stdout"
+
+    - name: Wait for application pods to be ready
+      ansible.builtin.command: >
+        kubectl wait --for=condition=ready pod
+        -l app={{ app_name }},component=backend
+        -n {{ namespace }}
+        --timeout=120s
+      register: wait_app
+      retries: 3
+      delay: 10
+      until: wait_app.rc == 0
+
+    - name: Wait for Nginx pods to be ready
+      ansible.builtin.command: >
+        kubectl wait --for=condition=ready pod
+        -l app={{ app_name }},component=proxy
+        -n {{ namespace }}
+        --timeout=120s
+      register: wait_nginx
+      retries: 3
+      delay: 10
+      until: wait_nginx.rc == 0
+
+    - name: Verify health endpoint
+      ansible.builtin.uri:
+        url: "http://localhost:{{ lookup('kubernetes.core.k8s', api_version='v1', kind='Service', namespace=namespace, resource_name='caragence-nginx').spec.ports[0].nodePort }}/health"
+        return_content: true
+        status_code: 200
+      register: health_check
+      retries: 10
+      delay: 5
+      until: health_check.status == 200
+      ignore_errors: true
+
+    - name: Get application URL
+      ansible.builtin.command: minikube service caragence-nginx -n caragence --url
+      register: app_url
+      changed_when: false
+
+    - name: Get Prometheus URL
+      ansible.builtin.command: minikube service prometheus -n caragence --url
+      register: prometheus_url
+      changed_when: false
+      ignore_errors: true
+
+    - name: Get Grafana URL
+      ansible.builtin.command: minikube service grafana -n caragence --url
+      register: grafana_url
+      changed_when: false
+      ignore_errors: true
+
+    - name: Display deployment summary
+      ansible.builtin.debug:
+        msg: |
+          === Deployment Complete ===
+          Namespace: {{ namespace }}
+          PV: {{ tf_pv_name }}
+          PVC: {{ tf_pvc_name }}
+          Storage: {{ tf_storage_path }}
+          App URL: {{ app_url.stdout }}
+          Health: http://{{ app_url.stdout | regex_replace('https?://', '') }}/health
+          Prometheus: {{ prometheus_url.stdout | default('pending...') }}
+          Grafana: {{ grafana_url.stdout | default('pending...') }} (admin/admin)
+    

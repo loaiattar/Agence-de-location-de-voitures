@@ -1,0 +1,7 @@
+# Copy this file to terraform.tfvars and fill in values
+namespace        = "caragence"
+app_name         = "caragence"
+storage_size     = "1Gi"
+storage_class    = "standard"
+kubeconfig_path  = "~/.kube/config"
+kubeconfig_context = "minikube"

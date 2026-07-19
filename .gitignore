@@ -5,3 +5,27 @@ obj/
 *.db-wal
 .vs/
 *.user
+
+# DevOps - secrets & state
+.env
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform.tfvars
+*.pem
+*.key
+k8s/secret.yaml
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test results
+TestResults/

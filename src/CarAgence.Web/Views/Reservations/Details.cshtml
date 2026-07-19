@@ -1,20 +1,46 @@
 @model CarAgence.Domain.Entities.Reservation
 
-@{ ViewData["Title"] = "Details reservation"; }
+@{ ViewData["Title"] = $"Reservation #{Model.Id}"; }
 
-<h1>Reservation #@Model.Id</h1>
-
-<div class="card mb-3">
-    <div class="card-body">
-        <p><strong>Client :</strong> @Model.Client?.Prenom @Model.Client?.Nom</p>
-        <p><strong>Email :</strong> @Model.Client?.Email</p>
-        <p><strong>Voiture :</strong> @Model.Voiture?.Immatriculation - @Model.Voiture?.Modele?.Marque?.Nom @Model.Voiture?.Modele?.Nom</p>
-        <p><strong>Tarif journalier :</strong> @Model.Voiture?.TarifJournalier €</p>
-        <p><strong>Date debut :</strong> @Model.DateDebut.ToString("dd/MM/yyyy")</p>
-        <p><strong>Date fin :</strong> @Model.DateFin.ToString("dd/MM/yyyy")</p>
-        <p><strong>Duree :</strong> @((Model.DateFin - Model.DateDebut).Days) jour(s)</p>
-        <p><strong>Montant total :</strong> @Model.GetMontantTotal() €</p>
+<div class="max-w-xl">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="space-y-3">
+            <div>
+                <span class="text-sm font-medium text-gray-500">Client</span>
+                <p class="text-gray-900 font-medium">@Model.Client?.Prenom @Model.Client?.Nom</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Email</span>
+                <p class="text-gray-900">@Model.Client?.Email</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Voiture</span>
+                <p class="text-gray-900">@Model.Voiture?.Immatriculation - @Model.Voiture?.Modele?.Marque?.Nom @Model.Voiture?.Modele?.Nom</p>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Tarif journalier</span>
+                <p class="text-gray-900">@Model.Voiture?.TarifJournalier €</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Date debut</span>
+                    <p class="text-gray-900">@Model.DateDebut.ToString("dd/MM/yyyy")</p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Date fin</span>
+                    <p class="text-gray-900">@Model.DateFin.ToString("dd/MM/yyyy")</p>
+                </div>
+            </div>
+            <div>
+                <span class="text-sm font-medium text-gray-500">Duree</span>
+                <p class="text-gray-900">@((Model.DateFin - Model.DateDebut).Days) jour(s)</p>
+            </div>
+            <div class="pt-3 border-t border-gray-200">
+                <span class="text-sm font-medium text-gray-500">Montant total</span>
+                <p class="text-2xl font-bold text-brand-600">@Model.GetMontantTotal() €</p>
+            </div>
+        </div>
     </div>
-</div>
 
-<a asp-action="Index" class="btn btn-secondary">Retour</a>
+    <a asp-action="Index" class="inline-block text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">&larr; Retour</a>
+</div>

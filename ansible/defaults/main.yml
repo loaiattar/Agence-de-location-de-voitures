@@ -1,0 +1,15 @@
+---
+# Application settings
+app_name: caragence
+namespace: caragence
+app_image: ghcr.io/loaiattar/agence-de-location-de-voitures
+app_tag: latest
+
+# Infrastructure
+terraform_dir: "../terraform"
+k8s_manifests_dir: "../k8s"
+monitoring_dir: "../monitoring"
+
+# Health check settings
+health_check_retries: 30
+health_check_delay: 10
