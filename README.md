@@ -72,6 +72,7 @@ minikube service caragence-nginx -n caragence --url
 
 | Document | Description |
 |----------|-------------|
+| [Documentation complète](docs/documentation.md) | Vue d'ensemble DevOps du projet |
 | [Architecture](docs/architecture.md) | Vue d'ensemble de l'architecture |
 | [CI/CD](docs/ci-cd.md) | Pipeline GitHub Actions |
 | [Déploiement local](docs/deploiement-local.md) | Étapes de déploiement |
