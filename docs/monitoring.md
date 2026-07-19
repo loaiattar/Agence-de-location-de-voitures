@@ -1,13 +1,28 @@
-# Monitoring - Prometheus & Grafana
+# Monitoring
 
 ## Services monitorés
 
 | Service | Port | Métriques |
 |---------|------|-----------|
 | Prometheus | 9090 | Métriques système Prometheus |
-| App CarAgence | 8080 | Métriques applicatives (/health) |
+| App CarAgence | 8080 | Métriques applicatives (si exposées) |
 | Nginx | 9113 | Métriques nginx-exporter |
 | Kubernetes | - | Métriques pods, nodes, ressources |
+
+## Dashboard Grafana
+
+Le dashboard `CarAgence Dashboard` contient 8 panneaux :
+
+| Panneau | Description |
+|---------|-------------|
+| App Pods Ready | Nombre de pods app prêts |
+| Nginx Pods Ready | Nombre de pods nginx prêts |
+| CPU Usage | Utilisation CPU totale (%) |
+| Memory Usage | Utilisation mémoire totale (MB) |
+| HTTP Requests | Requêtes HTTP par méthode et status |
+| Pod Restarts | Nombre de redémarrages par pod |
+| Network Traffic | Trafic réseau entrant/sortant |
+| SQLite Storage | Utilisation du volume SQLite |
 
 ## Accès local
 
@@ -31,38 +46,34 @@ minikube service grafana -n caragence --url
 - **Rétention** : 7 jours
 - **Jobs** : prometheus, caragence-app, nginx, kubernetes-pods
 
-### Scrape jobs
+## Alertes (bonus)
 
-| Job | Target | Interval |
-|-----|--------|----------|
-| `prometheus` | localhost:9090 | 15s |
-| `caragence-app` | caragence-app:8080/health | 10s |
-| `nginx` | caragence-nginx:9113/metrics | 15s |
-| `kubernetes-pods` | Pod annotations | 15s |
+Des alertes simples peuvent être ajoutées dans Prometheus :
 
-## Alertes
+```yaml
+rule_files:
+  - "alert_rules.yml"
 
-| Alerte | Sévérité | Condition |
-|--------|----------|-----------|
-| `PodNotReady` | warning | Deployment < 2 ready replicas pendant 5min |
-| `HighMemoryUsage` | warning | Container > 200MB pendant 5min |
-| `PodCrashLooping` | critical | Pod redémarré > 3 fois en 15min |
-| `PVCNearFull` | warning | PVC > 85% utilisé pendant 5min |
+# alert_rules.yml
+groups:
+  - name: caragence
+    rules:
+      - alert: PodNotReady
+        expr: kube_deployment_status_replicas_ready{namespace="caragence"} < 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod not ready in caragence"
 
-## Dashboard Grafana
-
-Le dashboard `CarAgence Dashboard` contient 8 panneaux :
-
-| Panneau | Description | Métrique |
-|---------|-------------|----------|
-| App Pods Ready | Pods app prêts | `kube_deployment_status_replicas_ready` |
-| Nginx Pods Ready | Pods nginx prêts | `kube_deployment_status_replicas_ready` |
-| CPU Usage | Utilisation CPU (%) | `container_cpu_usage_seconds_total` |
-| Memory Usage | Utilisation mémoire (MB) | `container_memory_usage_bytes` |
-| HTTP Requests | Requêtes HTTP | `http_requests_total` |
-| Pod Restarts | Redémarrages pods | `kube_pod_container_status_restarts_total` |
-| Network Traffic | Trafic réseau | `container_network_receive_bytes_total` |
-| SQLite Storage | Utilisation stockage | `node_filesystem_size_bytes` |
+      - alert: HighMemoryUsage
+        expr: container_memory_usage_bytes{namespace="caragence"} / 1024 / 1024 > 200
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage in caragence"
+```
 
 ## Vérification post-déploiement
 
@@ -75,7 +86,4 @@ kubectl port-forward svc/prometheus 9090:9090 -n caragence
 kubectl port-forward svc/grafana 3000:3000 -n caragence
 # Ouvrir http://localhost:3000 (admin/admin)
 # Aller dans Dashboards > CarAgence
-
-# Vérifier les alertes
-# Dans Prometheus : http://localhost:9090/alerts
 ```

@@ -1,86 +1,70 @@
-# Kubernetes - Ressources déployées
+# Kubernetes
 
-## Namespace
+## Ressources déployées
 
-`caragence` — isolation de toutes les ressources de l'application.
+### Namespace
+- `caragence` — isolation de l'application
 
-## Ressources applicatives
+### Application
+| Ressource | Nom | Description |
+|-----------|-----|-------------|
+| Deployment | `caragence-app` | 2 replicas, probes, resource limits |
+| Service | `caragence-app` | ClusterIP, port 8080 |
+| Secret | `caragence-secrets` | Connection string SQLite |
+| PVC | `caragence-sqlite-pvc` | 1Gi pour SQLite |
 
-### Deployments
+### Nginx Reverse Proxy
+| Ressource | Nom | Description |
+|-----------|-----|-------------|
+| Deployment | `caragence-nginx` | 2 replicas, probes |
+| Service | `caragence-nginx` | NodePort, port 80 |
+| ConfigMap | `nginx-config` | Configuration reverse proxy |
 
-| Deployment | Replicas | Image | Port |
-|------------|----------|-------|------|
-| `caragence-app` | 2 | `ghcr.io/.../agence-de-location-de-voitures:latest` | 8080 |
-| `caragence-nginx` | 2 | `nginx:alpine` | 80 |
+### Monitoring
+| Ressource | Nom | Description |
+|-----------|-----|-------------|
+| Deployment | `prometheus` | Collecte des métriques |
+| Service | `prometheus` | NodePort, port 9090 |
+| Deployment | `grafana` | Visualisation |
+| Service | `grafana` | NodePort, port 3000 |
+| ConfigMap | `prometheus-config` | Configuration scraping |
+| ConfigMap | `grafana-datasources` | Source Prometheus |
+| ConfigMap | `grafana-dashboards` | Dashboard CarAgence |
 
-### Services
+## Architecture réseau
 
-| Service | Type | Port | Sélecteur |
-|---------|------|------|-----------|
-| `caragence-app` | ClusterIP | 8080 | `app=caragence, component=backend` |
-| `caragence-nginx` | NodePort | 80 | `app=caragence, component=proxy` |
+```
+Utilisateur
+    ↓
+Nginx (NodePort 80)
+    ↓
+App (ClusterIP 8080)
+    ↓
+SQLite (/data/caragence.db)
+```
 
-### Stockage
+## Probes de santé
 
-| Ressource | Type | Taille | Description |
-|-----------|------|--------|-------------|
-| `caragence-sqlite-pv` | PersistentVolume | 1Gi | hostPath `/data/caragence-sqlite` |
-| `caragence-sqlite-pvc` | PersistentVolumeClaim | 1Gi | Bind au PV |
+### Application
+- **Liveness** : `GET /health` (port 8080)
+- **Readiness** : `GET /health/ready` (port 8080)
 
-### Configuration
+### Nginx
+- **Liveness** : `GET /` (port 80)
+- **Readiness** : `GET /` (port 80)
 
-| Ressource | Type | Contenu |
-|-----------|------|---------|
-| `nginx-config` | ConfigMap | Configuration reverse proxy Nginx |
-| `caragence-secrets` | Secret | Connection string SQLite |
+## Resources
 
-## Ressources monitoring
-
-### Deployments
-
-| Deployment | Image | Port |
-|------------|-------|------|
-| `prometheus` | `prom/prometheus:latest` | 9090 |
-| `grafana` | `grafana/grafana:latest` | 3000 |
-
-### Services
-
-| Service | Type | Port | NodePort |
-|---------|------|------|----------|
-| `prometheus` | NodePort | 9090 | 30090 |
-| `grafana` | NodePort | 3000 | 30030 |
-
-### Configuration
-
-| Ressource | Type | Contenu |
-|-----------|------|---------|
-| `prometheus-config` | ConfigMap | Config scrape + alert rules |
-| `grafana-datasource` | ConfigMap | Datasource Prometheus auto-provisionnée |
-| `grafana-dashboard` | ConfigMap | Dashboard 8 panneaux |
-
-## Configuration Nginx
-
-Nginx sert de reverse proxy :
-- `/` → `http://caragence-app:8080` (proxy_pass)
-- `/health` → health check passthrough
-- `/health/ready` → readiness check passthrough
-- Headers : X-Forwarded-For, X-Forwarded-Proto, Host
-
-## Probes
-
-| Probe | Path | Port | Interval |
-|-------|------|------|----------|
-| Liveness | `/health` | 8080 | 20s |
-| Readiness | `/health/ready` | 8080 | 10s |
-
-## Ressources CPU/Mémoire
-
-| Container | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| app | 100m | 500m | 128Mi | 256Mi |
-| nginx | 100m | 250m | 64Mi | 128Mi |
-| prometheus | 100m | 500m | 256Mi | 512Mi |
-| grafana | 100m | 500m | 128Mi | 256Mi |
+| Ressource | Request | Limit |
+|-----------|---------|-------|
+| CPU App | 100m | 500m |
+| Memory App | 128Mi | 256Mi |
+| CPU Nginx | 50m | 200m |
+| Memory Nginx | 64Mi | 128Mi |
+| CPU Prometheus | 100m | 500m |
+| Memory Prometheus | 128Mi | 256Mi |
+| CPU Grafana | 100m | 500m |
+| Memory Grafana | 128Mi | 256Mi |
 
 ## Commandes utiles
 
@@ -88,13 +72,18 @@ Nginx sert de reverse proxy :
 # Voir toutes les ressources
 kubectl get all -n caragence
 
-# Décrire un pod
-kubectl describe pod <pod-name> -n caragence
+# Voir les pods avec leurs IPs
+kubectl get pods -n caragence -o wide
 
-# Logs
+# Voir les logs d'un pod
 kubectl logs <pod-name> -n caragence
 
+# Exec dans un pod
+kubectl exec -it <pod-name> -n caragence -- /bin/sh
+
 # Port-forward
-kubectl port-forward svc/prometheus 9090:9090 -n caragence
-kubectl port-forward svc/grafana 3000:3000 -n caragence
+kubectl port-forward svc/caragence-nginx 8080:80 -n caragence
+
+# Voir les événements
+kubectl get events -n caragence --sort-by='.lastTimestamp'
 ```

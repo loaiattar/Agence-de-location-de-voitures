@@ -1,28 +1,20 @@
 # Agence de Location de Voitures (CarAgence)
 
-Application ASP.NET Core MVC de location de voitures avec persistance SQLite, déployée sur Kubernetes via une chaîne DevOps complète.
+Application ASP.NET Core MVC de location de voitures avec persistance SQLite, déployée sur Kubernetes avec un pipeline DevOps complet.
 
 ## Objectif
 
-Reprendre un projet de POO (Locatic) et y appliquer les bonnes pratiques DevOps :
-- Gestion Git professionnelle avec Pull Requests
-- Pipeline CI/CD automatisé (GitHub Actions)
-- Infrastructure as Code (Terraform)
-- Orchestration de déploiement (Ansible)
-- Déploiement Kubernetes sur minikube
-- Monitoring (Prometheus + Grafana)
+Mettre en place une chaîne DevOps complète : gestion Git professionnelle, pipeline CI/CD GitHub, infrastructure locale automatisée et déploiement Kubernetes sur minikube.
 
-## Prérequis
+## Prérequis locaux
 
-| Outil | Version minimale | Usage |
-|-------|-----------------|-------|
-| .NET SDK | 8.0 | Build et test |
-| Docker | latest | Conteneurisation |
-| minikube | latest | Cluster K8s local |
-| kubectl | latest | CLI Kubernetes |
-| Terraform | >= 1.0 | Infrastructure |
-| Ansible | >= 2.12 | Orchestration |
-| gh (GitHub CLI) | latest | Interaction GitHub |
+- .NET 8.0 SDK
+- Docker
+- minikube
+- kubectl
+- Terraform >= 1.0
+- Ansible (`pip install ansible`)
+- GitHub CLI (`gh`)
 
 ## Structure du projet
 
@@ -33,60 +25,69 @@ Reprendre un projet de POO (Locatic) et y appliquer les bonnes pratiques DevOps 
 │   ├── CarAgence.Services/      # Logique métier
 │   └── CarAgence.Web/           # Application web MVC
 ├── tests/
-│   └── CarAgence.Tests/         # Tests unitaires (~119 tests)
-├── .github/workflows/           # CI/CD GitHub Actions
-├── ansible/                     # Playbook d'orchestration
-├── terraform/                   # Infrastructure K8s
-├── k8s/                         # Manifests Kubernetes
-├── monitoring/                  # Prometheus + Grafana
-├── docker/                      # Configuration nginx pour docker-compose
-├── docs/                        # Documentation
-├── Dockerfile                   # Image Docker multi-stage
-├── docker-compose.yml           # Développement local
-└── README.md
+│   └── CarAgence.Tests/       # Tests unitaires (160 tests)
+├── .github/workflows/
+│   └── ci.yml                 # Pipeline CI/CD
+├── terraform/                 # Infrastructure K8s
+├── ansible/                   # Orchestration déploiement
+├── k8s/                       # Manifests Kubernetes
+├── monitoring/                # Config Prometheus + Grafana
+├── Dockerfile                 # Image Docker
+└── docs/                      # Documentation
 ```
+
+## Architecture
+
+```
+GitHub → GitHub Actions → ghcr.io → Terraform → Ansible → Kubernetes
+                                                                    ├── Nginx (reverse proxy)
+                                                                    ├── App (ASP.NET Core)
+                                                                    ├── SQLite (volume persistant)
+                                                                    ├── Prometheus
+                                                                    └── Grafana
+```
+
+Voir [docs/architecture.md](docs/architecture.md) pour le détail.
 
 ## Démarrage rapide
-
-### Développement local (docker-compose)
-
-```bash
-docker-compose up --build
-# App accessible sur http://localhost:80
-```
-
-### Déploiement sur minikube
 
 ```bash
 # 1. Démarrer minikube
 minikube start
 
-# 2. Exécuter le playbook Ansible
-cd ansible/
-ansible-playbook playbook.yml
+# 2. Construire l'image Docker
+docker build -t ghcr.io/loaiattar/agence-de-location-de-voitures:latest .
 
-# 3. Accéder aux services
-minikube service caragence-nginx -n caragence --url    # App
-minikube service grafana -n caragence --url             # Grafana (admin/admin)
-minikube service prometheus -n caragence --url          # Prometheus
+# 3. Charger l'image dans minikube
+minikube image load ghcr.io/loaiattar/agence-de-location-de-voitures:latest
+
+# 4. Déployer avec Ansible
+ansible-playbook ansible/playbook.yml
+
+# 5. Accéder à l'application
+minikube service caragence-nginx -n caragence --url
 ```
 
-## Développement
+## Documentation
 
-```bash
-dotnet restore
-dotnet build
-dotnet test
-```
+| Document | Description |
+|----------|-------------|
+| [Documentation complète](docs/documentation.md) | Vue d'ensemble DevOps du projet |
+| [Architecture](docs/architecture.md) | Vue d'ensemble de l'architecture |
+| [CI/CD](docs/ci-cd.md) | Pipeline GitHub Actions |
+| [Déploiement local](docs/deploiement-local.md) | Étapes de déploiement |
+| [Terraform](docs/terraform.md) | Infrastructure automatisée |
+| [Ansible](docs/ansible.md) | Orchestration locale |
+| [Kubernetes](docs/kubernetes.md) | Manifests et ressources K8s |
+| [Monitoring](docs/monitoring.md) | Prometheus et Grafana |
+| [Exploitation](docs/exploitation.md) | Vérifications et diagnostic |
 
 ## Branche `main` protégée
 
-La branche `main` est protégée :
-
-- **Pas de push direct** — tous les changements passent par Pull Request
-- **CI obligatoire** — le job `build-and-test` doit passer avant merge
-- **1 approval requis** — au moins 1 revue obligatoire
-- **Stale reviews** — les approvals sont révoquées si de nouveaux commits sont poussés
+- Pas de push direct — Pull Request obligatoire
+- CI obligatoire — `build-and-test` doit passer
+- 1 approval requis
+- Stale reviews révoqués
 
 ## Documentation
 
